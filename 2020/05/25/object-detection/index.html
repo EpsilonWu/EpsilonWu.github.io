@@ -79,15 +79,17 @@
 
 
 
-<meta name="description" content="目标检测[TOC] Region BasedR-CNN​    不同与分类任务，目标检测需要在图片中框选出目标的位置。一种简单的方式是使用滑动窗口依次扫描整张图片进行目标定位，R-CNN采用的是一种对滑动窗口改进的思想。类似于滑动窗口，R-CNN选取出2000个可能的窗口区域(Region Proposals)，对其进行特征提出，然后通过SVM对其进行分类。 Region Proposals​">
+<meta name="description" content="目标检测 [TOC] Region Based R-CNN ​ 不同与分类任务，目标检测需要在图片中框选出目标的位置。一种简单的方式是使用滑动窗口依次扫描整张图片进行目标定位，R-CNN采用的是一种对滑动窗口改进的思想。类似于滑动窗口，R-CNN选取出2000个可能的窗口区域(Region Proposals)，对其进行特征提出，然后通过SVM对其进行分类。 Region Proposa">
 <meta property="og:type" content="article">
 <meta property="og:title" content="object detection">
 <meta property="og:url" content="http://epsilonwu.github.io/2020/05/25/object-detection/index.html">
 <meta property="og:site_name" content="EpsilonWu">
-<meta property="og:description" content="目标检测[TOC] Region BasedR-CNN​    不同与分类任务，目标检测需要在图片中框选出目标的位置。一种简单的方式是使用滑动窗口依次扫描整张图片进行目标定位，R-CNN采用的是一种对滑动窗口改进的思想。类似于滑动窗口，R-CNN选取出2000个可能的窗口区域(Region Proposals)，对其进行特征提出，然后通过SVM对其进行分类。 Region Proposals​">
+<meta property="og:description" content="目标检测 [TOC] Region Based R-CNN ​ 不同与分类任务，目标检测需要在图片中框选出目标的位置。一种简单的方式是使用滑动窗口依次扫描整张图片进行目标定位，R-CNN采用的是一种对滑动窗口改进的思想。类似于滑动窗口，R-CNN选取出2000个可能的窗口区域(Region Proposals)，对其进行特征提出，然后通过SVM对其进行分类。 Region Proposa">
 <meta property="og:image" content="d:/blog/source/pic/RCNN%20fig1.png">
 <meta property="og:image" content="d:/blog/source/pic/FastRCNN%20fig1.png">
 <meta property="og:image" content="d:/blog/source/pic/FasterRCNN%20fig1.png">
+<meta property="og:image" content="d:/blog/source/pic/FasterRCNN%20fig2.png">
+<meta property="og:image" content="d:/blog/source/pic/FasterRCNN%20fig3.png">
 <meta property="article:published_time" content="2020-05-25T05:00:46.076Z">
 <meta property="article:modified_time" content="2020-05-25T11:08:09.358Z">
 <meta property="article:author" content="EpsilonWu">
@@ -345,87 +347,109 @@
       
 
       
-        <h1 id="目标检测"><a href="#目标检测" class="headerlink" title="目标检测"></a>目标检测</h1><p>[TOC]</p>
-<h2 id="Region-Based"><a href="#Region-Based" class="headerlink" title="Region Based"></a>Region Based</h2><h3 id="R-CNN"><a href="#R-CNN" class="headerlink" title="R-CNN"></a>R-CNN</h3><p>​    不同与分类任务，目标检测需要在图片中框选出目标的位置。一种简单的方式是使用滑动窗口依次扫描整张图片进行目标定位，R-CNN采用的是一种对滑动窗口改进的思想。类似于滑动窗口，R-CNN选取出2000个可能的窗口区域(Region Proposals)，对其进行特征提出，然后通过SVM对其进行分类。</p>
-<h4 id="Region-Proposals"><a href="#Region-Proposals" class="headerlink" title="Region Proposals"></a>Region Proposals</h4><p>​    滑动窗口的思想基本上穷举了图像中物体所有出现的区域框，复杂度太高，同时目标的尺寸多样，对于窗口的大小不好控制。论文中采用Selective search的方式进行Region Proposals减少了候选框的数量。</p>
-<h5 id="Selective-Search"><a href="#Selective-Search" class="headerlink" title="Selective Search"></a>Selective Search</h5><p>基本思想是：先分割出小尺度的区域，然后进行合并</p>
+        <h1 id="目标检测">目标检测</h1>
+<p>[TOC]</p>
+<h2 id="region-based">Region Based</h2>
+<h3 id="r-cnn">R-CNN</h3>
+<p>​ 不同与分类任务，目标检测需要在图片中框选出目标的位置。一种简单的方式是使用滑动窗口依次扫描整张图片进行目标定位，R-CNN采用的是一种对滑动窗口改进的思想。类似于滑动窗口，R-CNN选取出2000个可能的窗口区域(Region Proposals)，对其进行特征提出，然后通过SVM对其进行分类。</p>
+<h4 id="region-proposals">Region Proposals</h4>
+<p>​ 滑动窗口的思想基本上穷举了图像中物体所有出现的区域框，复杂度太高，同时目标的尺寸多样，对于窗口的大小不好控制。论文中采用Selective search的方式进行Region Proposals减少了候选框的数量。</p>
+<h5 id="selective-search">Selective Search</h5>
+<p>基本思想是：先分割出小尺度的区域，然后进行合并</p>
 <p>设计标准：</p>
-<ol>
+<ol type="1">
 <li>Capture All Scales. 满足目标大小尺寸的多样性</li>
 <li>Diversification. 区域合并的方式多样化（颜色，纹理，光照等）</li>
 <li>Fast to Compute. 快速</li>
 </ol>
-<h6 id="Hierarchical-Grouping"><a href="#Hierarchical-Grouping" class="headerlink" title="Hierarchical Grouping"></a>Hierarchical Grouping</h6><ol>
+<h6 id="hierarchical-grouping">Hierarchical Grouping</h6>
+<ol type="1">
 <li><strong>图像分割</strong></li>
 </ol>
-<p>​    该算法第一步是将图像进行分割，选用的方法是Felzenszwalb和Huttenlocher创建的Graph-Based Image Segmentation。</p>
-<p>​    Graph-Based Image Segmentation的思想是将相似的划分在一个区域，而不同区域间的元素应该是不相似的（低类内，高类间）。</p>
-<p>​    基本思想是将图像中表示为图论中的图，顶点为图像中的像素点，边为像素点之间的关系。通过最小生成树的方式生成区域分割。</p>
-<p>​    算法中采用4邻域或者8邻域的方式，将每个像素点与其邻域建立边，边的权值为两个像素点的不相似度，即相似度越高，权值越低。</p>
-<p>​    边权值的计算方式为$w((v_i,v_j))=|I(p_i)-I(p_j)|$，其中$I(p_i), I(p_j)$为对应像素的强度，在计算前会使用高斯滤波器进行滤波，三通道即三次计算后相加。</p>
+<p>​ 该算法第一步是将图像进行分割，选用的方法是Felzenszwalb和Huttenlocher创建的Graph-Based Image Segmentation。</p>
+<p>​ Graph-Based Image Segmentation的思想是将相似的划分在一个区域，而不同区域间的元素应该是不相似的（低类内，高类间）。</p>
+<p>​ 基本思想是将图像中表示为图论中的图，顶点为图像中的像素点，边为像素点之间的关系。通过最小生成树的方式生成区域分割。</p>
+<p>​ 算法中采用4邻域或者8邻域的方式，将每个像素点与其邻域建立边，边的权值为两个像素点的不相似度，即相似度越高，权值越低。</p>
+<p>​ 边权值的计算方式为<span class="math inline">\(w((v_i,v_j))=|I(p_i)-I(p_j)|\)</span>，其中<span class="math inline">\(I(p_i), I(p_j)\)</span>为对应像素的强度，在计算前会使用高斯滤波器进行滤波，三通道即三次计算后相加。</p>
 <p><strong><em>内部差 internal difference</em></strong></p>
-<p>MST为原图像的图的最小生成树，C为每个划分，$Int(C)$为每个划分的内部差异<br>$$<br>Int(C)=\max_{e\in MST(C,E)}w(e)<br>$$<br>上述式子衡量的是一个区域内的权值最大的边</p>
+<p>MST为原图像的图的最小生成树，C为每个划分，<span class="math inline">\(Int(C)\)</span>为每个划分的内部差异 <span class="math display">\[
+Int(C)=\max_{e\in MST(C,E)}w(e)
+\]</span> 上述式子衡量的是一个区域内的权值最大的边</p>
 <p><strong><em>外部差 difference</em></strong></p>
-<p>$C_1, C_2$为两个划分，其差异为<br>$$<br>Dif(C_1, C_2)=\min_{v_i\in C_1, v_j\in C_2, (v_i, v_j)\in E}w((v_i, v_j))<br>$$<br>如果$C_1, C_2$之间没有边，则其差异为无穷，上述式子衡量的两个划分间存在的权值最小的边</p>
-<p><strong><em>分割判别标准</em></strong><br>$$<br>D(C_1, C_2)<br>\begin{cases}<br>true\ \ \ if\ Dif(C_1,C_2)&gt;MInt(C_1, C_2)\<br>false\ \ \ otherwise<br>\end{cases}<br>$$<br>上述式子表明划分的标准是类间的差距至少大于其中一个类内差距，其中<br>$$<br>MInt(C_1, C_2)=min(Int(C_1)+\tau (C_1), Int(C_2)+\tau (C_2))<br>$$<br>$\tau$是阈值函数，其存在是为了将小区域也能够进行合并，因为小区域的内部差较小，比如如果只有一个点，则$Int(C_1)$为0，若无阈值约束，则会被划分出去。故使用$\tau$加入点个数的影响，使得小区域不会轻易的划分出去。</p>
+<p><span class="math inline">\(C_1, C_2\)</span>为两个划分，其差异为 <span class="math display">\[
+Dif(C_1, C_2)=\min_{v_i\in C_1, v_j\in C_2, (v_i, v_j)\in E}w((v_i, v_j))
+\]</span> 如果<span class="math inline">\(C_1, C_2\)</span>之间没有边，则其差异为无穷，上述式子衡量的两个划分间存在的权值最小的边</p>
+<p><strong><em>分割判别标准</em></strong> <span class="math display">\[
+D(C_1, C_2)
+\begin{cases}
+true\ \ \ if\ Dif(C_1,C_2)&gt;MInt(C_1, C_2)\\
+false\ \ \ otherwise
+\end{cases}
+\]</span> 上述式子表明划分的标准是类间的差距至少大于其中一个类内差距，其中 <span class="math display">\[
+MInt(C_1, C_2)=min(Int(C_1)+\tau (C_1), Int(C_2)+\tau (C_2))
+\]</span> <span class="math inline">\(\tau\)</span>是阈值函数，其存在是为了将小区域也能够进行合并，因为小区域的内部差较小，比如如果只有一个点，则<span class="math inline">\(Int(C_1)\)</span>为0，若无阈值约束，则会被划分出去。故使用<span class="math inline">\(\tau\)</span>加入点个数的影响，使得小区域不会轻易的划分出去。</p>
 <p><strong><em>图像分割算法实现</em></strong></p>
-<ol>
+<ol type="1">
 <li>对所有边按照权值升序排序</li>
 <li>初始化分割，每个结点为一个分割</li>
 <li>重复操作4，m次（m为边数，即遍历所有边）</li>
-<li>如果$v_i, v_j$属于不同的划分，按照上述$D(C_1,C_2)$的方式进行区域合并和划分。</li>
+<li><p>如果<span class="math inline">\(v_i, v_j\)</span>属于不同的划分，按照上述<span class="math inline">\(D(C_1,C_2)\)</span>的方式进行区域合并和划分。</p></li>
+<li><p><strong>区域合并 Hierarchical Grouping Algorithm</strong></p></li>
 </ol>
-<ol start="2">
-<li><strong>区域合并 Hierarchical Grouping Algorithm</strong></li>
-</ol>
-<p>由上述图像分割算法得到图像区域$R={r_1, …, r_n}$</p>
-<p>初始化集合$S = \phi$</p>
-<ol>
-<li>对所有的相邻区域对$(r_i, r_j)$ do<ol>
-<li>计算相似度$s(r_i,r_j)$</li>
-<li>$S=S\bigcup s(r_i, r_j)$</li>
-</ol>
-</li>
-<li>while $S\neq \phi$ do<ol>
-<li>在S中取出最大相似度$s(r_i,r_j)=max(S)$</li>
-<li>合并对应区域$r_t=r_i\bigcup r_j$</li>
-<li>移除所有的与$r_i$相关的相似度，$S = S\setminus s(r_i,r_*)$</li>
-<li>移除所有的与$r_j$相关的相似度，$S = S\setminus s(r_j,r_*)$</li>
-<li>计算新的相似集合和区域集合$S=S\bigcup S_t\ \ R=R\bigcup r_t$</li>
-</ol>
-</li>
+<p>由上述图像分割算法得到图像区域<span class="math inline">\(R=\{r_1, ..., r_n\}\)</span></p>
+<p>初始化集合<span class="math inline">\(S = \phi\)</span></p>
+<ol type="1">
+<li>对所有的相邻区域对<span class="math inline">\((r_i, r_j)\)</span> do
+<ol type="1">
+<li>计算相似度<span class="math inline">\(s(r_i,r_j)\)</span></li>
+<li><span class="math inline">\(S=S\bigcup s(r_i, r_j)\)</span></li>
+</ol></li>
+<li>while <span class="math inline">\(S\neq \phi\)</span> do
+<ol type="1">
+<li>在S中取出最大相似度<span class="math inline">\(s(r_i,r_j)=max(S)\)</span></li>
+<li>合并对应区域<span class="math inline">\(r_t=r_i\bigcup r_j\)</span></li>
+<li>移除所有的与<span class="math inline">\(r_i\)</span>相关的相似度，<span class="math inline">\(S = S\setminus s(r_i,r_*)\)</span></li>
+<li>移除所有的与<span class="math inline">\(r_j\)</span>相关的相似度，<span class="math inline">\(S = S\setminus s(r_j,r_*)\)</span></li>
+<li>计算新的相似集合和区域集合<span class="math inline">\(S=S\bigcup S_t\ \ R=R\bigcup r_t\)</span></li>
+</ol></li>
 </ol>
 <p>上述算法用贪心策略的思想，对相似度最高的两个区域进行合并，一直合并到最后只剩整张图片，并且在R中保留了所有合并过程的区域</p>
-<h6 id="Diversification-Strategies"><a href="#Diversification-Strategies" class="headerlink" title="Diversification Strategies"></a>Diversification Strategies</h6><p>​    Region Proposals必须保证Region的划分方式具有多样性。</p>
-<ol>
+<h6 id="diversification-strategies">Diversification Strategies</h6>
+<p>​ Region Proposals必须保证Region的划分方式具有多样性。</p>
+<ol type="1">
 <li><p>颜色空间</p>
-<p>​    为了使整个算法能够满足不同场景以及不同的光照条件，在不同的颜色空间内实施Hierarchical Grouping算法。有(1)RGB，(2)灰度，(3)Lab，(4)rgI (归一化RGB的rg通道加上灰度值I)，(5)HSV，(6)rgb(归一化的RGB)，(7)C，(8)HSV。采取不同的颜色空间，在输入Graph-Based Image Segmentation算法中边权值的计算结果就会不同，最终得到的初始化划分方式也不同。</p>
-</li>
+<p>​ 为了使整个算法能够满足不同场景以及不同的光照条件，在不同的颜色空间内实施Hierarchical Grouping算法。有(1)RGB，(2)灰度，(3)Lab，(4)rgI (归一化RGB的rg通道加上灰度值I)，(5)HSV，(6)rgb(归一化的RGB)，(7)C，(8)HSV。采取不同的颜色空间，在输入Graph-Based Image Segmentation算法中边权值的计算结果就会不同，最终得到的初始化划分方式也不同。</p></li>
 <li><p>区域相似度（均归一化到[0,1]区间，1为最相似）</p>
-<ol>
+<ol type="1">
 <li><p>颜色相似度</p>
-<p>​    对图像计算直方图(25bins)，由于3个通道会得到一个75维向量，然后对直方图进行$L_1$归一化（每个值取绝对值除以总和），${c_i^1,…,c_i^n}$<br>$$<br>s_{color}(r_i,r_j)=\sum_{k=1}^n min(c_i^k,c_j^k)<br>$$<br>​    上述公式可以理解为：归一化的直方图的总和应该为一个定值1，如果两个图片相似则其直方图分布应该相似，最极端的两张图相同，则上述式子中$min(c_i^k, c_j^k)$应该是其中任意一个值，则$s_{color}$应该为任意一张图片的归一化的直方图的和，即为1，如果两张图不相似，即相似度&lt;1</p>
-</li>
+<p>​ 对图像计算直方图(25bins)，由于3个通道会得到一个75维向量，然后对直方图进行<span class="math inline">\(L_1\)</span>归一化（每个值取绝对值除以总和），<span class="math inline">\(\{c_i^1,...,c_i^n\}\)</span> <span class="math display">\[
+s_{color}(r_i,r_j)=\sum_{k=1}^n min(c_i^k,c_j^k)
+\]</span> ​ 上述公式可以理解为：归一化的直方图的总和应该为一个定值1，如果两个图片相似则其直方图分布应该相似，最极端的两张图相同，则上述式子中<span class="math inline">\(min(c_i^k, c_j^k)\)</span>应该是其中任意一个值，则<span class="math inline">\(s_{color}\)</span>应该为任意一张图片的归一化的直方图的和，即为1，如果两张图不相似，即相似度&lt;1</p></li>
 <li><p>纹理相似度</p>
-<p>​    采用SIFT-like特征，描述了尺度不变性。采用方程为1的高斯梯度对每个颜色空间的8个方向进行求取。最后计算直方图(10bins)，然后进行$L_1$归一化，得到240维向量${t_i^1, …,t_i^n}$<br>$$<br>s_{texture}(r_i,r_j)=\sum_{k=1}^n min(t_i^k,t_j^k)<br>$$<br>​    理解方式类似于颜色的相似度</p>
-</li>
+<p>​ 采用SIFT-like特征，描述了尺度不变性。采用方程为1的高斯梯度对每个颜色空间的8个方向进行求取。最后计算直方图(10bins)，然后进行<span class="math inline">\(L_1\)</span>归一化，得到240维向量<span class="math inline">\(\{t_i^1, ...,t_i^n\}\)</span> <span class="math display">\[
+s_{texture}(r_i,r_j)=\sum_{k=1}^n min(t_i^k,t_j^k)
+\]</span> ​ 理解方式类似于颜色的相似度</p></li>
 <li><p>大小相似度</p>
-<p>​    大小相似度鼓励小的区域先合并，使得合并算法的每一步中所有区域大小相近，同时防止了一个区域逐渐合并所有区域。<br>$$<br>s_{size}(r_i,r_j)=1-\frac{size(r_i)+size(r_j)}{size(image)}<br>$$<br>​    上述式子可以看出小区域之间的相似度会更大</p>
-</li>
+<p>​ 大小相似度鼓励小的区域先合并，使得合并算法的每一步中所有区域大小相近，同时防止了一个区域逐渐合并所有区域。 <span class="math display">\[
+s_{size}(r_i,r_j)=1-\frac{size(r_i)+size(r_j)}{size(image)}
+\]</span> ​ 上述式子可以看出小区域之间的相似度会更大</p></li>
 <li><p>fill相似度</p>
-<p>​    该相似度计算两个区域的相容性，极端的如果$r_i$是$r_j$的一部分，理应当进行合并，防止最终结果出现一个一个孔洞。<br>$$<br>s_{fill}(r_i,r_j)=1-\frac{size(BB_{ij})-size(r_i)-size(r_j)}{size(image)}<br>$$<br>其中$$size(BB_{ij})$$为能够框住$r_i，r_j$的最理想bounding box大小。可以看出$r_i,r_j$的相容性越好，框住他们的bbox的空余部分越小，相似度越高</p>
-</li>
+<p>​ 该相似度计算两个区域的相容性，极端的如果<span class="math inline">\(r_i\)</span>是<span class="math inline">\(r_j\)</span>的一部分，理应当进行合并，防止最终结果出现一个一个孔洞。 <span class="math display">\[
+s_{fill}(r_i,r_j)=1-\frac{size(BB_{ij})-size(r_i)-size(r_j)}{size(image)}
+\]</span> 其中<span class="math display">\[size(BB_{ij})\]</span>为能够框住<span class="math inline">\(r_i，r_j\)</span>的最理想bounding box大小。可以看出<span class="math inline">\(r_i,r_j\)</span>的相容性越好，框住他们的bbox的空余部分越小，相似度越高</p></li>
 <li><p>最终相似度的计算</p>
-<p>​    最终相似度为上诉相似度的加权平均，此相似度即为上诉Hierarchical Grouping算法中的相似度<br>$$<br>s(r_i,r_j)=a_1s_{color}(r_i,r_j)+a_2s_{texture}(r_i,r_j)+<br>a_3s_{size}(r_i,r_j)+a_4s_{fill}(r_i,r_j)<br>$$</p>
-</li>
+<p>​ 最终相似度为上诉相似度的加权平均，此相似度即为上诉Hierarchical Grouping算法中的相似度 <span class="math display">\[
+s(r_i,r_j)=a_1s_{color}(r_i,r_j)+a_2s_{texture}(r_i,r_j)+
+a_3s_{size}(r_i,r_j)+a_4s_{fill}(r_i,r_j)
+\]</span></p></li>
+</ol></li>
 </ol>
-</li>
-</ol>
-<h6 id="Combining-Locations"><a href="#Combining-Locations" class="headerlink" title="Combining Locations"></a>Combining Locations</h6><p>​    如何选出哪些候选区域价值更高？按照该候选区域出现的顺序进行排序，先出现的权值更高，但是会有许多相同权值，故对每个合并策略，将他们的权值乘以一个随机数，同时对于多次出现的区域也赋予它更高的权值，因为如果多个合并策略都建议了相同的框，说明他作为候选框的潜力也更大。</p>
-<h4 id="Feature-extraction-amp-SVM"><a href="#Feature-extraction-amp-SVM" class="headerlink" title="Feature extraction &amp; SVM"></a>Feature extraction &amp; SVM</h4><p>​    通过上述的Region Proposals得到了若干个候选框，我们将它们均输入到一个CNN中最后得到一个4096维的特征向量中。由于候选框大小不一，而CNN的输入大小为227x227，故需要将所有候选框转换到一个相同的尺寸。论文中提到了3种变换方式：(a)tightest square with context (b)tightest square with context (c)warp，直接拉伸（图片比例可能变形）</p>
-<img src="D:\blog\source\pic\RCNN fig1.png" alt="RCNN fig1" style="zoom:50%;" />
-
-<p>​    我们通过SVM对特征进行分类打分，对所有打分的候选框，采用非极大抑制选出候选框</p>
+<h6 id="combining-locations">Combining Locations</h6>
+<p>​ 如何选出哪些候选区域价值更高？按照该候选区域出现的顺序进行排序，先出现的权值更高，但是会有许多相同权值，故对每个合并策略，将他们的权值乘以一个随机数，同时对于多次出现的区域也赋予它更高的权值，因为如果多个合并策略都建议了相同的框，说明他作为候选框的潜力也更大。</p>
+<h4 id="feature-extraction-svm">Feature extraction &amp; SVM</h4>
+<p>​ 通过上述的Region Proposals得到了若干个候选框，我们将它们均输入到一个CNN中最后得到一个4096维的特征向量中。由于候选框大小不一，而CNN的输入大小为227x227，故需要将所有候选框转换到一个相同的尺寸。论文中提到了3种变换方式：(a)tightest square with context (b)tightest square with context (c)warp，直接拉伸（图片比例可能变形）</p>
+<p><img src="D:\blog\source\pic\RCNN fig1.png" alt="RCNN fig1" style="zoom:50%;" /></p>
+<p>​ 我们通过SVM对特征进行分类打分，对所有打分的候选框，采用非极大抑制选出候选框</p>
 <blockquote>
 <p>非极大抑制 Non-maximum suppression</p>
 <blockquote>
@@ -435,65 +459,92 @@
 </blockquote>
 <p>NMS可以减少多个候选框识别到同一个物体的情况，从而抛弃那些冗余的候选框</p>
 </blockquote>
-<p>​    为什么要使用SVM而不是直接将CNN输出通过一个softmax层？</p>
-<p>​    softmax的效果与SVM相差4%，fine-tuning过程中使用了大量IOU在0.5-1之间的数据，这些数据的使用是为了防止CNN过拟合，但是这些数据没有特别注重准确的定位信息，softmax则对这些不准确的框进行了训练，但是SVM的标准更加严格。当然SVM会加大时间消耗，这是时间和准确度上的trade off。</p>
-<h4 id="Bounding-box-regression"><a href="#Bounding-box-regression" class="headerlink" title="Bounding-box regression"></a>Bounding-box regression</h4><p>​    在SVM进行分数计算后，采用了一个线性回归算法提升框选位置的准确性。</p>
-<h4 id="Training"><a href="#Training" class="headerlink" title="Training"></a>Training</h4><p>​    CNN采用的是对ILSVRC2012分类数据集的预训练模型。CNN的参数针对拉伸折叠的候选区域进行了fine-tuning。fine-tuning选取与ground-truth的IOU大于0.5的为正例，否则则标为背景。SVM训练过程中只选取ground-truth为正例，与ground-truth的IOU小于0.3的为负例（背景），其他的忽略。</p>
-<h4 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h4><ol>
+<p>​ 为什么要使用SVM而不是直接将CNN输出通过一个softmax层？</p>
+<p>​ softmax的效果与SVM相差4%，fine-tuning过程中使用了大量IOU在0.5-1之间的数据，这些数据的使用是为了防止CNN过拟合，但是这些数据没有特别注重准确的定位信息，softmax则对这些不准确的框进行了训练，但是SVM的标准更加严格。当然SVM会加大时间消耗，这是时间和准确度上的trade off。</p>
+<h4 id="bounding-box-regression">Bounding-box regression</h4>
+<p>​ 在SVM进行分数计算后，采用了一个线性回归算法提升框选位置的准确性。</p>
+<h4 id="training">Training</h4>
+<p>​ CNN采用的是对ILSVRC2012分类数据集的预训练模型。CNN的参数针对拉伸折叠的候选区域进行了fine-tuning。fine-tuning选取与ground-truth的IOU大于0.5的为正例，否则则标为背景。SVM训练过程中只选取ground-truth为正例，与ground-truth的IOU小于0.3的为负例（背景），其他的忽略。</p>
+<h4 id="缺点">缺点</h4>
+<ol type="1">
 <li>Region Proposals算法是固定的，不能针对图片动态调整</li>
 <li>非端到端</li>
 <li>Training过程极慢，需要磁盘空间大</li>
 <li>检测阶段慢</li>
 </ol>
-<h3 id="Fast-RCNN"><a href="#Fast-RCNN" class="headerlink" title="Fast RCNN"></a>Fast RCNN</h3><h4 id="Fast-RCNN框架"><a href="#Fast-RCNN框架" class="headerlink" title="Fast RCNN框架"></a>Fast RCNN框架</h4><p>​    对整张图输入CNN和一个max pooling，对feature map使用region proposals, 对每个RoI通过一个RoI pooling层得到若干个固定大小的特征向量，将特征向量输入全连接层，然后输入到2个输出层，一个输出层输出softmax概率信息，一个输出层对bounding-box进行调整。</p>
-<img src="D:\blog\source\pic\FastRCNN fig1.png" alt="FastRCNN fig1" style="zoom:50%;" />
-
-<h4 id="RoI-Pooling-layer"><a href="#RoI-Pooling-layer" class="headerlink" title="RoI Pooling layer"></a>RoI Pooling layer</h4><p>​    RoI Pooling Layer对不同尺度的Region of Interest框输出一个固定大小的特征向量，设RoI的大小信息为$(r,c,h,w)$，其中$(r,c)$为左上角的点，$(h,w)$为高度和宽度。RoI max pooling将输入的$h<em>w$的图像分割为$H</em>W$个$h/H*w/W$大小的小块，对每个块进行max-pooling。</p>
-<h4 id="Training-1"><a href="#Training-1" class="headerlink" title="Training"></a>Training</h4><p>​    采用pre-trained ImageNet network，修改最后一层max pooling为RoI pooling layer，以及修改最后的输出层为2个输出层。</p>
+<h3 id="fast-rcnn">Fast RCNN</h3>
+<h4 id="fast-rcnn框架">Fast RCNN框架</h4>
+<p>​ 对整张图输入CNN和一个max pooling，对feature map使用region proposals, 对每个RoI通过一个RoI pooling层得到若干个固定大小的特征向量，将特征向量输入全连接层，然后输入到2个输出层，一个输出层输出softmax概率信息，一个输出层对bounding-box进行调整。</p>
+<p><img src="D:\blog\source\pic\FastRCNN fig1.png" alt="FastRCNN fig1" style="zoom:50%;" /></p>
+<h4 id="roi-pooling-layer">RoI Pooling layer</h4>
+<p>​ RoI Pooling Layer对不同尺度的Region of Interest框输出一个固定大小的特征向量，设RoI的大小信息为<span class="math inline">\((r,c,h,w)\)</span>，其中<span class="math inline">\((r,c)\)</span>为左上角的点，<span class="math inline">\((h,w)\)</span>为高度和宽度。RoI max pooling将输入的<span class="math inline">\(h*w\)</span>的图像分割为<span class="math inline">\(H*W\)</span>个<span class="math inline">\(h/H*w/W\)</span>大小的小块，对每个块进行max-pooling。</p>
+<h4 id="training-1">Training</h4>
+<p>​ 采用pre-trained ImageNet network，修改最后一层max pooling为RoI pooling layer，以及修改最后的输出层为2个输出层。</p>
 <p><strong>Loss</strong></p>
-<p>对于一个类别$u$，bounding-box的目标为$v^u$，预测为$t^u$，$[u\ge1]$表示满足时取1，否则取0<br>$$<br>L(p,u,t^u,v)=L_{cls}(p,u)+\lambda[u\ge1]L_{loc}(t^u,v)\<br>L_{cls}(p,u)=-logp_u\<br>L_{loc}(t^u,v)=\sum_{i\in{x,y,w,h}}smooth_{L_1}(t_i^u-v_i)\<br>smooth_{L_1}(x)=<br>\begin{cases}<br>0.5x^2\ \ \ \ \ \ \ \ \ \ if|x|&lt;1\<br>|x|-0.5\ \ \ \ \ otherwise<br>\end{cases}<br>$$<br>​    Fast RCNN的Training和Test时间远低于RCNN，但test阶段，主要时间在Region Proposals上。</p>
-<h3 id="Faster-RCNN"><a href="#Faster-RCNN" class="headerlink" title="Faster RCNN"></a>Faster RCNN</h3><h4 id="CNN"><a href="#CNN" class="headerlink" title="CNN"></a>CNN</h4><p>​    Faster RCNN的CNN部分采用ZFnet或VGG</p>
-<h4 id="Region-Proposal-Networks"><a href="#Region-Proposal-Networks" class="headerlink" title="Region Proposal Networks"></a>Region Proposal Networks</h4><p>​    RPN输入一张任意大小的图像，输出一系列矩形候选框，并为每个候选框分配一个objectness score(衡量object和background的囊括程度)。</p>
-<p>​    share conv layer? //todo</p>
-<p>​    RPN用一个小的网络以滑动窗口的形式扫描整个由第一个CNN输出的特征图，将其映射为一个相对低维的特征（ZF：256，VGG：512）。然后将该特征输入到两个全连接层中box-regression layer和box-classification layer。</p>
-<h5 id="Anchors"><a href="#Anchors" class="headerlink" title="Anchors"></a>Anchors</h5><p>​    我们对输入RPN的feature map上的每一个点设为一个anchor，设每个anchor对应$k$个候选框，则对于reg layer会输出$4k$大小的输出，分别代表这$k$个候选框的需要修正的坐标差，cls layer会输出$2k$大小输出，为是否是目标的概率(object/ not object)。</p>
-<p>​    anchor虽然是由feature map上定义的，但它实际上应该是原始图像上的点（比如VGG下采样比为16，那么原图像每两个anchor相隔15个像素）。</p>
-<p>​    faster RCNN中由9个anchor boxes，分别是三种不同大小(128,256,512)和三种不同长宽比(1:1,1:2,2:1)，来模拟不同尺度和比例的bbox。因为由9个anchor boxes，如果输入图像为WxH，下采样比为r，那么就会有$(W/r)<em>(H/r)</em>9$个anchor。</p>
-<img src="D:\blog\source\pic\FasterRCNN fig1.png" alt="FasterRCNN fig1" style="zoom:50%;" />
-
-<p>​    对于anchor的后续处理如下图：</p>
-<p>![FasterRCNN fig2](D:\blog\source\pic\FasterRCNN fig2.png)</p>
-<p>上图中有$60<em>40</em>9$个anchor，经过一个3x3x512的卷积层，在不改变特征图的分辨率的情况下将特征图的维度改为512(ZFnet为256)，然后依次输入到两个网络中。第一个网络通过一个1x1x36的卷积层，36为9个anchor box的4个bbox回归误差。第二个网络通过一个1x1x18的卷积层，18为9个anchor box的2个分数(object/ not object)。</p>
-<h5 id="Loss"><a href="#Loss" class="headerlink" title="Loss"></a>Loss</h5><p>​    一个anchor box与ground-truth的IoU大于0.7，将该anchor视为正例，IoU小于0.3，视为反例，在这之间不计入loss的计算，减小了参与的anchor的数量。loss函数的形式为：<br>$$<br>L({p_i},{t_i})=\frac{1}{N_{cls}}\sum_iL_{cls}(p_i,p_i^<em>)+\lambda\frac{1}{N_{reg}}\sum_ip_i^*L_{reg}(t_i,t_i^</em>)<br>$$<br>其中$i$为每个mini-batch（从每张图片中随机选取mini-batch个anchor，正例和反例比为1：1）中的anchor坐标，$p_i$是分类网络的输出，$p_i^<em>$在anchor位正例时为1，反例时为0。regression loss只有在正例的情况下计算，反例不计算，因为只有正例才需要对框进行回归，背景不需要回归。$t_i$为预测的bounding box而$t_i^</em>$为ground-truth对应的bounding box。$L_{reg}$为smooth $L_1$，$L_{cls}$为log loss。$N_{cls}$为mini-batch的大小，$N_{reg}$为anchor的个数。</p>
-<h4 id="Sharing-Features-for-RPN-and-Fast-RCNN"><a href="#Sharing-Features-for-RPN-and-Fast-RCNN" class="headerlink" title="Sharing Features for RPN and Fast RCNN"></a>Sharing Features for RPN and Fast RCNN</h4><p>​    首先训练RPN，然后用RPN的proposals去训练Fast RCNN，然后通过Fast RCNN来初始化RPN权值，不断迭代进行。</p>
+<p>对于一个类别<span class="math inline">\(u\)</span>，bounding-box的目标为<span class="math inline">\(v^u\)</span>，预测为<span class="math inline">\(t^u\)</span>，<span class="math inline">\([u\ge1]\)</span>表示满足时取1，否则取0 <span class="math display">\[
+L(p,u,t^u,v)=L_{cls}(p,u)+\lambda[u\ge1]L_{loc}(t^u,v)\\
+L_{cls}(p,u)=-logp_u\\
+L_{loc}(t^u,v)=\sum_{i\in\{x,y,w,h\}}smooth_{L_1}(t_i^u-v_i)\\
+smooth_{L_1}(x)=
+\begin{cases}
+0.5x^2\ \ \ \ \ \ \ \ \ \ if|x|&lt;1\\
+|x|-0.5\ \ \ \ \ otherwise
+\end{cases}
+\]</span> ​ Fast RCNN的Training和Test时间远低于RCNN，但test阶段，主要时间在Region Proposals上。</p>
+<h3 id="faster-rcnn">Faster RCNN</h3>
+<h4 id="cnn">CNN</h4>
+<p>​ Faster RCNN的CNN部分采用ZFnet或VGG</p>
+<h4 id="region-proposal-networks">Region Proposal Networks</h4>
+<p>​ RPN输入一张任意大小的图像，输出一系列矩形候选框，并为每个候选框分配一个objectness score(衡量object和background的囊括程度)。</p>
+<p>​ share conv layer? //todo</p>
+<p>​ RPN用一个小的网络以滑动窗口的形式扫描整个由第一个CNN输出的特征图，将其映射为一个相对低维的特征（ZF：256，VGG：512）。然后将该特征输入到两个全连接层中box-regression layer和box-classification layer。</p>
+<h5 id="anchors">Anchors</h5>
+<p>​ 我们对输入RPN的feature map上的每一个点设为一个anchor，设每个anchor对应<span class="math inline">\(k\)</span>个候选框，则对于reg layer会输出<span class="math inline">\(4k\)</span>大小的输出，分别代表这<span class="math inline">\(k\)</span>个候选框的需要修正的坐标差，cls layer会输出<span class="math inline">\(2k\)</span>大小输出，为是否是目标的概率(object/ not object)。</p>
+<p>​ anchor虽然是由feature map上定义的，但它实际上应该是原始图像上的点（比如VGG下采样比为16，那么原图像每两个anchor相隔15个像素）。</p>
+<p>​ faster RCNN中由9个anchor boxes，分别是三种不同大小(128,256,512)和三种不同长宽比(1:1,1:2,2:1)，来模拟不同尺度和比例的bbox。因为由9个anchor boxes，如果输入图像为WxH，下采样比为r，那么就会有<span class="math inline">\((W/r)*(H/r)*9\)</span>个anchor。</p>
+<p><img src="D:\blog\source\pic\FasterRCNN fig1.png" alt="FasterRCNN fig1" style="zoom:50%;" /></p>
+<p>​ 对于anchor的后续处理如下图：</p>
+<figure>
+<img src="D:\blog\source\pic\FasterRCNN%20fig2.png" alt="FasterRCNN fig2" /><figcaption>FasterRCNN fig2</figcaption>
+</figure>
+<p>上图中有<span class="math inline">\(60*40*9\)</span>个anchor，经过一个3x3x512的卷积层，在不改变特征图的分辨率的情况下将特征图的维度改为512(ZFnet为256)，然后依次输入到两个网络中。第一个网络通过一个1x1x36的卷积层，36为9个anchor box的4个bbox回归误差。第二个网络通过一个1x1x18的卷积层，18为9个anchor box的2个分数(object/ not object)。</p>
+<h5 id="loss">Loss</h5>
+<p>​ 一个anchor box与ground-truth的IoU大于0.7，将该anchor视为正例，IoU小于0.3，视为反例，在这之间不计入loss的计算，减小了参与的anchor的数量。loss函数的形式为： <span class="math display">\[
+L(\{p_i\},\{t_i\})=\frac{1}{N_{cls}}\sum_iL_{cls}(p_i,p_i^*)+\lambda\frac{1}{N_{reg}}\sum_ip_i^*L_{reg}(t_i,t_i^*)
+\]</span> 其中<span class="math inline">\(i\)</span>为每个mini-batch（从每张图片中随机选取mini-batch个anchor，正例和反例比为1：1）中的anchor坐标，<span class="math inline">\(p_i\)</span>是分类网络的输出，<span class="math inline">\(p_i^*\)</span>在anchor位正例时为1，反例时为0。regression loss只有在正例的情况下计算，反例不计算，因为只有正例才需要对框进行回归，背景不需要回归。<span class="math inline">\(t_i\)</span>为预测的bounding box而<span class="math inline">\(t_i^*\)</span>为ground-truth对应的bounding box。<span class="math inline">\(L_{reg}\)</span>为smooth <span class="math inline">\(L_1\)</span>，<span class="math inline">\(L_{cls}\)</span>为log loss。<span class="math inline">\(N_{cls}\)</span>为mini-batch的大小，<span class="math inline">\(N_{reg}\)</span>为anchor的个数。</p>
+<h4 id="sharing-features-for-rpn-and-fast-rcnn">Sharing Features for RPN and Fast RCNN</h4>
+<p>​ 首先训练RPN，然后用RPN的proposals去训练Fast RCNN，然后通过Fast RCNN来初始化RPN权值，不断迭代进行。</p>
 <p><strong><em>Approximate Joint Training</em></strong></p>
-<p>​    将RPN的proposal是作为Fast RCNN的selective search的替代，然后按照原来的方式进行参数更新。</p>
+<p>​ 将RPN的proposal是作为Fast RCNN的selective search的替代，然后按照原来的方式进行参数更新。</p>
 <p><strong><em>Non-approximate Joint Training</em></strong></p>
-<p>​    //todo</p>
+<p>​ //todo</p>
 <p><strong><em>4-step Alternating Training</em></strong></p>
-<p>​    首先训练RPN(ImageNet pretrained)</p>
-<p>​    用RPN得到的proposal训练Fast RCNN（ImageNet pretrained)</p>
-<p>​    继续训练RPN，RPN由Fast RCNN的参数来初始化，只修改不是shared的conv layer</p>
-<p>​    继续训练Fast RCNN，修改Fast RCNN不共享的conv layer</p>
-<p>![FasterRCNN fig3](D:\blog\source\pic\FasterRCNN fig3.png)</p>
+<p>​ 首先训练RPN(ImageNet pretrained)</p>
+<p>​ 用RPN得到的proposal训练Fast RCNN（ImageNet pretrained)</p>
+<p>​ 继续训练RPN，RPN由Fast RCNN的参数来初始化，只修改不是shared的conv layer</p>
+<p>​ 继续训练Fast RCNN，修改Fast RCNN不共享的conv layer</p>
+<figure>
+<img src="D:\blog\source\pic\FasterRCNN%20fig3.png" alt="FasterRCNN fig3" /><figcaption>FasterRCNN fig3</figcaption>
+</figure>
 <p>上面图片中Backbone部分为RPN和Fast RCNN的shared部分。</p>
-<p>​    </p>
-<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><p>1.R-CNN </p>
+<p>​</p>
+<h2 id="参考文献">参考文献</h2>
+<p>1.R-CNN</p>
 <p>(Rich feature hierarchies for accurate object detection and semantic segmentation)</p>
-<p><a href="https://arxiv.org/pdf/1311.2524.pdf" target="_blank" rel="noopener">https://arxiv.org/pdf/1311.2524.pdf</a></p>
+<p>https://arxiv.org/pdf/1311.2524.pdf</p>
 <p>2.Selective Search</p>
 <p>(Selective Search for Object Recognition)</p>
-<p><a href="http://www.huppelen.nl/publications/selectiveSearchDraft.pdf" target="_blank" rel="noopener">http://www.huppelen.nl/publications/selectiveSearchDraft.pdf</a></p>
+<p>http://www.huppelen.nl/publications/selectiveSearchDraft.pdf</p>
 <p>3.Efficient Graph-Based Image Segmentation</p>
-<p><a href="http://people.cs.uchicago.edu/~pff/papers/seg-ijcv.pdf" target="_blank" rel="noopener">http://people.cs.uchicago.edu/~pff/papers/seg-ijcv.pdf</a></p>
+<p>http://people.cs.uchicago.edu/~pff/papers/seg-ijcv.pdf</p>
 <p>4.Fast R-CNN</p>
-<p><a href="https://arxiv.org/pdf/1504.08083.pdf" target="_blank" rel="noopener">https://arxiv.org/pdf/1504.08083.pdf</a></p>
+<p>https://arxiv.org/pdf/1504.08083.pdf</p>
 <p>5.Faster R-CNN</p>
 <p>(Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks)</p>
-<p><a href="https://arxiv.org/pdf/1506.01497.pdf" target="_blank" rel="noopener">https://arxiv.org/pdf/1506.01497.pdf</a></p>
+<p>https://arxiv.org/pdf/1506.01497.pdf</p>
 <p>6.YOLO</p>
 <p>(You Only Look Once)</p>
-<p><a href="https://arxiv.org/pdf/1506.02640v5.pdf" target="_blank" rel="noopener">https://arxiv.org/pdf/1506.02640v5.pdf</a></p>
+<p>https://arxiv.org/pdf/1506.02640v5.pdf</p>
 
       
     </div>
@@ -633,7 +684,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#目标检测"><span class="nav-number">1.</span> <span class="nav-text">目标检测</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Region-Based"><span class="nav-number">1.1.</span> <span class="nav-text">Region Based</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#R-CNN"><span class="nav-number">1.1.1.</span> <span class="nav-text">R-CNN</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Region-Proposals"><span class="nav-number">1.1.1.1.</span> <span class="nav-text">Region Proposals</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Selective-Search"><span class="nav-number">1.1.1.1.1.</span> <span class="nav-text">Selective Search</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#Hierarchical-Grouping"><span class="nav-number">1.1.1.1.1.1.</span> <span class="nav-text">Hierarchical Grouping</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#Diversification-Strategies"><span class="nav-number">1.1.1.1.1.2.</span> <span class="nav-text">Diversification Strategies</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#Combining-Locations"><span class="nav-number">1.1.1.1.1.3.</span> <span class="nav-text">Combining Locations</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Feature-extraction-amp-SVM"><span class="nav-number">1.1.1.2.</span> <span class="nav-text">Feature extraction &amp; SVM</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Bounding-box-regression"><span class="nav-number">1.1.1.3.</span> <span class="nav-text">Bounding-box regression</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Training"><span class="nav-number">1.1.1.4.</span> <span class="nav-text">Training</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#缺点"><span class="nav-number">1.1.1.5.</span> <span class="nav-text">缺点</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Fast-RCNN"><span class="nav-number">1.1.2.</span> <span class="nav-text">Fast RCNN</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Fast-RCNN框架"><span class="nav-number">1.1.2.1.</span> <span class="nav-text">Fast RCNN框架</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#RoI-Pooling-layer"><span class="nav-number">1.1.2.2.</span> <span class="nav-text">RoI Pooling layer</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Training-1"><span class="nav-number">1.1.2.3.</span> <span class="nav-text">Training</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Faster-RCNN"><span class="nav-number">1.1.3.</span> <span class="nav-text">Faster RCNN</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#CNN"><span class="nav-number">1.1.3.1.</span> <span class="nav-text">CNN</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Region-Proposal-Networks"><span class="nav-number">1.1.3.2.</span> <span class="nav-text">Region Proposal Networks</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Anchors"><span class="nav-number">1.1.3.2.1.</span> <span class="nav-text">Anchors</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Loss"><span class="nav-number">1.1.3.2.2.</span> <span class="nav-text">Loss</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Sharing-Features-for-RPN-and-Fast-RCNN"><span class="nav-number">1.1.3.3.</span> <span class="nav-text">Sharing Features for RPN and Fast RCNN</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考文献"><span class="nav-number">1.2.</span> <span class="nav-text">参考文献</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#目标检测"><span class="nav-number">1.</span> <span class="nav-text">目标检测</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#region-based"><span class="nav-number">1.1.</span> <span class="nav-text">Region Based</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#r-cnn"><span class="nav-number">1.1.1.</span> <span class="nav-text">R-CNN</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#region-proposals"><span class="nav-number">1.1.1.1.</span> <span class="nav-text">Region Proposals</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#selective-search"><span class="nav-number">1.1.1.1.1.</span> <span class="nav-text">Selective Search</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#hierarchical-grouping"><span class="nav-number">1.1.1.1.1.1.</span> <span class="nav-text">Hierarchical Grouping</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#diversification-strategies"><span class="nav-number">1.1.1.1.1.2.</span> <span class="nav-text">Diversification Strategies</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#combining-locations"><span class="nav-number">1.1.1.1.1.3.</span> <span class="nav-text">Combining Locations</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#feature-extraction-svm"><span class="nav-number">1.1.1.2.</span> <span class="nav-text">Feature extraction &amp; SVM</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#bounding-box-regression"><span class="nav-number">1.1.1.3.</span> <span class="nav-text">Bounding-box regression</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#training"><span class="nav-number">1.1.1.4.</span> <span class="nav-text">Training</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#缺点"><span class="nav-number">1.1.1.5.</span> <span class="nav-text">缺点</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#fast-rcnn"><span class="nav-number">1.1.2.</span> <span class="nav-text">Fast RCNN</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#fast-rcnn框架"><span class="nav-number">1.1.2.1.</span> <span class="nav-text">Fast RCNN框架</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#roi-pooling-layer"><span class="nav-number">1.1.2.2.</span> <span class="nav-text">RoI Pooling layer</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#training-1"><span class="nav-number">1.1.2.3.</span> <span class="nav-text">Training</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#faster-rcnn"><span class="nav-number">1.1.3.</span> <span class="nav-text">Faster RCNN</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#cnn"><span class="nav-number">1.1.3.1.</span> <span class="nav-text">CNN</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#region-proposal-networks"><span class="nav-number">1.1.3.2.</span> <span class="nav-text">Region Proposal Networks</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#anchors"><span class="nav-number">1.1.3.2.1.</span> <span class="nav-text">Anchors</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#loss"><span class="nav-number">1.1.3.2.2.</span> <span class="nav-text">Loss</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#sharing-features-for-rpn-and-fast-rcnn"><span class="nav-number">1.1.3.3.</span> <span class="nav-text">Sharing Features for RPN and Fast RCNN</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考文献"><span class="nav-number">1.2.</span> <span class="nav-text">参考文献</span></a></li></ol></li></ol></div>
             
 
           </div>
